@@ -5,6 +5,7 @@ from openai import OpenAI
 from collections import deque
 from contextlib import closing
 from pathlib import Path
+from openai import APIConnectionError,APIStatusError,OpenAI
 
 DB_PATH = Path(__file__).resolve().with_name("demo.db")
 MAX_ROWS =50
@@ -53,7 +54,7 @@ tools = [{
 }]
 
 # ---------- Agent 循环 ----------
-def ask_agent(question: str,history=()) -> str:
+def ask_agent(question: str,history=()) -> str|None:
     messages = [
         {"role": "system", "content": (
             "你是一个数据分析助手。你可以使用 run_sql 工具查询 sales 表"
@@ -70,12 +71,25 @@ def ask_agent(question: str,history=()) -> str:
     ]
 
     for _ in range(5):  # 防止死循环，最多 5 轮
-        resp = client.chat.completions.create(
+        try:
+            resp = client.chat.completions.create(
             model="deepseek-flash",  # 换成你可用的模型
             messages=messages,
             tools=tools,
             tool_choice="auto"
         )
+        except APIConnectionError:
+            print("连接模型服务失败或请求超时，请检查网络后重试。")
+            return None
+        except APIStatusError as exc:
+            if exc.status_code == 401:
+                print("模型服务认证失败，请检查 API Key。")
+            elif exc.status_code == 429:
+                print("模型服务请求受限，请稍后重试或检查额度。")
+            else:
+                print(f"模型请求失败（HTTP {exc.status_code}），请检查配置或服务状态。")
+            return None
+
         msg = resp.choices[0].message
 
         # 模型没有调用工具，说明它准备直接回答
@@ -123,6 +137,8 @@ if __name__ == "__main__":
             for message in turn
         ]
         answer = ask_agent(q, recent_messages)
+        if answer is None:
+            continue
         print(f"\nAgent：{answer}")
 
         if answer and answer != "达到最大轮次，任务未完成。":

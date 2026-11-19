@@ -85,14 +85,24 @@ def ask_agent(question: str,history=()) -> str:
         # 模型要求调用工具
         messages.append(msg)
         for call in msg.tool_calls:
-            args = json.loads(call.function.arguments)
-            print(f"  [工具调用] SQL: {args['sql']}")
-            result = run_sql(args["sql"])
-            print(f"  [工具结果] {result[:200]}...")
+            try:
+                args = json.loads(call.function.arguments)
+            except (json.JSONDecodeError, TypeError):
+                args = None
+
+            sql = args.get("sql") if isinstance(args, dict) else None
+
+            if not isinstance(sql, str) or not sql.strip():
+                result = '参数错误：请传入包含非空 "sql" 字符串的 JSON 对象。'
+            else:
+                print(f"  [工具调用] SQL: {sql}")
+                result = run_sql(sql)
+
+            print(f"  [工具结果] {result[:200]}")
             messages.append({
                 "role": "tool",
                 "tool_call_id": call.id,
-                "content": result
+                "content": result,
             })
 
     return "达到最大轮次，任务未完成。"

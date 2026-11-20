@@ -62,6 +62,7 @@ def ask_agent(question: str,history=()) -> str|None:
             "先想清楚需要什么数据，再调用工具；拿到数据后用中文写一段简洁的报告。"
             "在日期条件明确且查询成功的情况下，拿到空结果就直接回答"
             "不要编造数据。"
+            "回答销售额、总金额等货币数值时，统一在数字后标明单位“元”，例如“总销售额为 2780 元"
             "当工具返回 truncated=true 时，说明结果只展示了部分记录，并询问用户是否继续查看下一页。"
             "用户请求明细时，按 id 排序分页；避免用 GROUP_CONCAT 等聚合函数拼接整表明细。"
             "回答问题时，精准回答用户所提的问题，不要列举那些没用的信息，比如问卖了什么商品时不需要给出金额，如此类比"
@@ -137,8 +138,6 @@ if __name__ == "__main__":
             for message in turn
         ]
         answer = ask_agent(q, recent_messages)
-        if answer is None:
-            continue
         print(f"\nAgent：{answer}")
 
         if answer and answer != "达到最大轮次，任务未完成。":
@@ -146,3 +145,21 @@ if __name__ == "__main__":
                 {"role": "user", "content": q},
                 {"role": "assistant", "content": answer},
             ))
+
+            while True:
+                feedback = input("\n[系统] 回答满意吗？(直接回车跳过，输入 n 记录为错题): ").strip().lower()
+                if feedback == "":
+                    print("[系统] 已跳过。")  # 加上这句，让你明确知道已经跳过了
+                    break
+                elif feedback == "n":
+                    record = {
+                        "question": q,
+                        "bad_answer": answer,
+                        "history": recent_messages,
+                    }
+                    with open("bad_cases.log", "a", encoding="utf-8") as f:
+                        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    print("[系统] 已记录到 bad_cases.log，感谢反馈！")
+                    break
+                else:
+                    print("[系统] 输入无效，请直接回车，或输入 n 记录。")

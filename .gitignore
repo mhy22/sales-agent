@@ -6,3 +6,4 @@ __pycache__/
 !.env.example
 demo.db
 demo.db-*
+/bad_cases.log

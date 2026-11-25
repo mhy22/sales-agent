@@ -2,7 +2,7 @@
   {"id": 1, "question": "9 月卖了哪些商品", "expect_keywords": ["笔记本", "鼠标"]},
   {"id": 2, "question": "9 月的总销售额是多少", "expect_keywords": [], "expect_pattern": "(?<![\\d.,，-])(?:人民币\\s*)?(?:[¥￥]\\s*(?:2780|2[,，]780)(?:\\.0+)?(?![\\d.,，])|(?:2780|2[,，]780)(?:\\.0+)?\\s*元)"},
   {"id": 3, "question": "10 月键盘卖了几件", "expect_keywords": [], "expect_pattern": "(?<![\\d.,，-])2\\s*(?:件|个|台)"},
-  {"id": 4, "question": "10 月键盘的总金额是多少", "expect_keywords": [], "expect_pattern": "(?<![\\d.,，-])(?:人民币\\s*)?(?:[¥￥]\\s*650(?:\\.0+)?(?![\\d.,，])|650(?:\\.0+)?\\s*元)"},
+  {"id": 4, "question": "10 月键盘的总金额是多少", "expect_keywords": [],"expected_sql_value": 650,"expected_sql_column": "total", "expect_pattern": "(?<![\\d.,，-])(?:人民币\\s*)?(?:[¥￥]\\s*650(?:\\.0+)?(?![\\d.,，])|650(?:\\.0+)?\\s*元)"},
   {"id": 5, "question": "哪个商品总金额最高", "expect_keywords": ["笔记本"]},
   {"id": 6, "question": "10 月鼠标卖了几件", "expect_keywords": [], "expect_pattern": "(?<![\\d.,，-])3\\s*(?:件|个|只)"},
   {"id": 7, "question": "所有商品的总销售额是多少", "expect_keywords": [], "expect_pattern": "(?<![\\d.,，-])(?:人民币\\s*)?(?:[¥￥]\\s*(?:6220|6[,，]220)(?:\\.0+)?(?![\\d.,，])|(?:6220|6[,，]220)(?:\\.0+)?\\s*元)"},
